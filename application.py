@@ -13,7 +13,7 @@ users = db["users"]
 
 #REGISTRAR USUARIO
 
-@application.route('/', methods=['POST'])
+@application.route('/')
 def home():
     return jsonify({'Status':'Last Version Working'})
 
