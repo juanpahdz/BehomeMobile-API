@@ -2,7 +2,7 @@ import re
 import pymongo
 from bson.objectid import ObjectId
 from bson.json_util import dumps
-from flask import Flask, request
+from flask import Flask, request, jsonify
 
 application = Flask(__name__)
 
@@ -22,52 +22,41 @@ def CreateUsers():
     Password = request.json['Password']
 
     if Fullname and Email and Country and City and Password:
-        Id = users.insert_one(
-            {'Fullname':Fullname, 'Email':Email, 'City':City, 'Password': Password}
+        id = users.insert(
+            {'Fullname':Fullname, 'Email':Email,'Country':Country, 'City':City, 'Password': Password}
         )
-        response = {
-            'Id': str(Id),
+
+        user = {
+            'Id': str(ObjectId(id)),
             'Fullname': Fullname,
             'Email': Email,
             'Country': Country,
             'City': City,
             'Password': Password
         }
-        return response
-    else:
-        {'message':'recived'}    
-    
 
-
-    return {'message':'recived'}
+        del user["password"]
+        return user
+  
+    return {'error':'Theres missing data'}
 
 #LOGIN VALIDAR USUARIO
 @application.route('/login/<string:getemail>/<string:getpassword>', methods=['POST', 'GET'])
 def Login(getemail,getpassword):
     query = {"Email": getemail,"Password": getpassword}
-    result = users.find(query)
-    data = []
-    for document in result:
-        data.applicationend(document)
-    print(data)
-    if len(data) >= 1:
-        return "1"
-    else:
-        return "0"
+    result = users.find_one(query)
+
+    if result is not None:
+        del result["_id"]
+        return jsonify(result)
+
+    return jsonify({'error':'Error user not found'})
 
    
 #LEER TODA LA DATA DE APARTAMENTOS
 @application.route('/readallapartments', methods=['GET'])
 def ReadAllapArtments():
     result = dumps(apartments.find()) 
-
-    # data = []
-    # for document in result:
-    #     data.applicationend(document)
-
-    # l = str(data)
-    # data = json.dumps(l)
-    # info = json.loads(data)
 
     return result
 
@@ -79,7 +68,6 @@ def delete(getid):
     apartments.delete_one(query)
     
     return "Registro Eliminado"
-
 
 if __name__ == "__main__":
     application.run(debug=True)
