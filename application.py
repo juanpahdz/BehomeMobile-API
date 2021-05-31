@@ -47,7 +47,7 @@ def CreateUsers():
     return jsonify({'error':'Theres missing data'})
 
 #LOGIN VALIDAR USUARIO
-@application.route('/login', methods='POST')
+@application.route('/login', methods=['POST'])
 def Login():
     query = {"Email": request.json['email'],"Password": request.json['password']}
     result = users.find_one(query)
