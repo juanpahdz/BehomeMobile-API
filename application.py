@@ -12,6 +12,11 @@ apartments = db["apartments"]
 users = db["users"]
 
 #REGISTRAR USUARIO
+
+@application.route('/', methods=['POST'])
+def home():
+    return jsonify({'Status':'Last Version Working'})
+
 @application.route('/createusers', methods=['POST'])
 def CreateUsers():
 
@@ -39,7 +44,7 @@ def CreateUsers():
 
         return user
   
-    return {'error':'Theres missing data'}
+    return jsonify({'error':'Theres missing data'})
 
 #LOGIN VALIDAR USUARIO
 @application.route('/login', methods='POST')
