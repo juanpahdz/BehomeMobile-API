@@ -36,14 +36,15 @@ def CreateUsers():
         }
 
         del user["password"]
+
         return user
   
     return {'error':'Theres missing data'}
 
 #LOGIN VALIDAR USUARIO
-@application.route('/login/<string:getemail>/<string:getpassword>', methods=['POST', 'GET'])
-def Login(getemail,getpassword):
-    query = {"Email": getemail,"Password": getpassword}
+@application.route('/login', methods='POST')
+def Login():
+    query = {"Email": request.json['email'],"Password": request.json['password']}
     result = users.find_one(query)
 
     if result is not None:
