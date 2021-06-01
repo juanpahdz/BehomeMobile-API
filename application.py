@@ -3,8 +3,11 @@ import pymongo
 from bson.objectid import ObjectId
 from bson.json_util import dumps
 from flask import Flask, request, jsonify
+from passlib.hash import pbkdf2_sha256
+import uuid
 
 application = Flask(__name__)
+application.secret_key = "123askldaskfbbaskdkasgjash0120fd17237ajkhafkas"
 
 connection = pymongo.MongoClient("mongodb://admin:3023457476@50.19.173.205:27017")
 db = connection["fourseasons"]
@@ -20,43 +23,46 @@ def home():
 @application.route('/createusers', methods=['POST'])
 def CreateUsers():
 
-    Fullname = request.json['Fullname']
-    Email = request.json['Email']
-    Country = request.json['Country']
-    City = request.json['City']
-    Password = request.json['Password']
+    fullname = request.json['fullname']
+    email = request.json['email']
+    country = request.json['country']
+    city = request.json['city']
+    password = request.json['password']
 
-    if Fullname and Email and Country and City and Password:
-        id = users.insert(
-            {'Fullname':Fullname, 'Email':Email,'Country':Country, 'City':City, 'Password': Password}
-        )
+    if fullname and email and country and city and password:
 
         user = {
-            'Id': str(ObjectId(id)),
-            'Fullname': Fullname,
-            'Email': Email,
-            'Country': Country,
-            'City': City,
-            'Password': Password
-        }
+            '_id': uuid.uuid4().hex,
+            'fullname': fullname,
+            'email': email,
+            'country': country,
+            'city': city,
+            'password': password
+            }
 
-        del user["password"]
+        user["password"] = pbkdf2_sha256.encrypt(user['password'])
 
-        return user
+        if users.find_one({"email": user["email"]}):
+            return jsonify({"error": "Ese email ya esta registrado"}), 400
+
+        if users.insert_one(user):
+            del user["password"]
+            return user
   
-    return jsonify({'error':'Theres missing data'})
+        return jsonify({'error':'El registro fallo, por favor intenta mas tarde'})
+
+    return jsonify({'error':'necesitas llenar todos los datos antes de enviar'})
 
 #LOGIN VALIDAR USUARIO
 @application.route('/login', methods=['POST'])
 def Login():
-    query = {"Email": request.json['email'],"Password": request.json['password']}
-    result = users.find_one(query)
+    user = db.users.find_one({"email": request.json['email'] })
 
-    if result is not None:
-        del result["_id"]
-        return jsonify(result)
+    if user and pbkdf2_sha256.verify(request.json['password'], user['password']):
+        del user["password"]
+        return jsonify(user)
 
-    return jsonify({'error':'Error user not found'})
+    return jsonify({ "error": "Contraseña Incorrecta" }), 401
 
    
 #LEER TODA LA DATA DE APARTAMENTOS
