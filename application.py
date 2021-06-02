@@ -74,12 +74,44 @@ def ReadAllapArtments():
 
 
 #ELIMINAR APARTAMENTOS
-@application.route('/delete/<string:getid>', methods=['POST', 'GET'])
-def delete(getid):
-    query = {"_id": ObjectId(getid)}
+@application.route('/delete', methods=['POST'])
+def delete():
+    query = {"_id": ObjectId(request.json['id'])}
     apartments.delete_one(query)
     
     return "Registro Eliminado"
+
+#CREATE APARTMENT
+@application.route('/createapartments', methods=['POST'])
+def createapartments():
+
+    title = request.json['title']
+    pricenight = request.json['pricenight']
+    numrooms = request.json['numrooms']
+    meters = request.json['meters']
+    ubicacion = request.json['ubicacion']
+    imagenes = request.json['imagenes']
+
+    if title and pricenight and numrooms and meters and ubicacion and imagenes:
+
+        apartment = {
+            '_id': uuid.uuid4().hex,
+            'title': title,
+            'pricenight': pricenight,
+            'numrooms': numrooms,
+            'meters': meters,
+            'ubicacion': ubicacion,
+            'imagenes': imagenes,
+            }
+
+
+        if apartments.insert_one(apartment):
+            return apartment
+  
+        return jsonify({'error':'El registro fallo, por favor intenta mas tarde'})
+
+    return jsonify({'error':'necesitas llenar todos los datos antes de enviar'})
+
 
 if __name__ == "__main__":
     application.run(debug=True)
