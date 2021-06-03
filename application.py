@@ -100,7 +100,7 @@ def updateapartments(getid):
     if title and pricenight and numrooms and meters and googlemaps:
 
         query = {"_id": getid}
-        newvalues = {"$set":{"title":title,"pricenight":pricenight,"numrooms":numrooms,"meters":meters,"googlemaps":googlemaps}}
+        newvalues = {"$set":{"title":title,"pricenight":pricenight,"numrooms":numrooms,"meters":meters,"ubicacion":googlemaps}}
         apartments.update_one(query,newvalues)
         return  jsonify({'Ms':'Apartamento actualizado'})
     else:
