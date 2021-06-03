@@ -73,6 +73,12 @@ def ReadAllapArtments():
     return result
 
 
+#LEER TODA LA DATA DE APARTAMENTOS
+@application.route('/readapartment/<string:getid>', methods=['GET'])
+def ReadArtment(getid):
+    apartment = apartments.find_one({"_id": getid} )
+    return jsonify(apartment)   
+
 #ELIMINAR APARTAMENTOS
 @application.route('/delete', methods=['POST'])
 def delete():
@@ -80,6 +86,25 @@ def delete():
     apartments.delete_one(query)
     
     return "Registro Eliminado"
+
+#UPDATE APARTMENT 
+@application.route('/updateapartments/<string:getid>', methods=['POST','GET'])
+def updateapartments(getid):
+
+    title = request.json['title']
+    pricenight = request.json['pricenight']
+    numrooms = request.json['numrooms']
+    meters = request.json['meters']
+    googlemaps = request.json['googlemaps']
+
+    if title and pricenight and numrooms and meters and googlemaps:
+
+        query = {"_id": getid}
+        newvalues = {"$set":{"title":title,"pricenight":pricenight,"numrooms":numrooms,"meters":meters,"googlemaps":googlemaps}}
+        apartments.update_one(query,newvalues)
+        return  jsonify({'Ms':'Apartamento actualizado'})
+    else:
+        return jsonify({'error':'Error al actualizar'})        
 
 #CREATE APARTMENT
 @application.route('/createapartments', methods=['POST'])
