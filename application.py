@@ -80,9 +80,9 @@ def ReadArtment(getid):
     return jsonify(apartment)   
 
 #ELIMINAR APARTAMENTOS
-@application.route('/delete', methods=['POST'])
-def delete():
-    query = {"_id": ObjectId(request.json['id'])}
+@application.route('/delete/<string:getid>', methods=['GET'])
+def delete(getid):
+    query = {"_id": getid}
     apartments.delete_one(query)
     
     return "Registro Eliminado"
